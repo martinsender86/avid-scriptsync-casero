@@ -1,0 +1,184 @@
+﻿=====================================================================
+  AVID SCRIPTSYNC CASERO  -  v1.2 (octubre 2026)
+  Desgrabaciones -> Scripts de Avid enlazados a los subclips
+=====================================================================
+
+QUÉ HACE
+--------
+Dos herramientas para Avid Media Composer:
+
+1) IMPORTAR_SCRIPTS
+   Convierte una carpeta entera de desgrabaciones (.txt) en Scripts de
+   Avid, de una sola vez. Es lo mismo que importar cada .txt a mano como
+   script, pero por lote.
+
+2) SCRIPTSYNC_AVID
+   Por cada script del proyecto, busca en TODOS los bins el subclip que
+   se llama igual, lo enlaza al script y pone una script mark en cada
+   párrafo, en el timecode que indica la desgrabación.
+   Resultado: hacés clic en un párrafo del script y el subclip salta a
+   ese momento en el monitor de origen.
+
+Funciona con clips de cualquier frame rate (23.976, 24, 25, 29.97...),
+aunque estén mezclados en el mismo proyecto.
+
+
+REQUISITOS
+----------
+- Avid Media Composer. Probado con la versión 2026.8 (ver "LIMITACIONES").
+- Python 3 (gratis):
+    Windows: https://www.python.org/downloads/
+             Al instalar, MARCÁ la opción "Add python.exe to PATH".
+    Mac:     si al abrir el .command dice que no encuentra Python,
+             instalalo desde https://www.python.org/downloads/
+- Internet solo la primera vez, para instalar la librería pyavb (se
+  instala sola).
+
+
+APP PARA WINDOWS (LA FORMA MÁS FÁCIL)
+-------------------------------------
+Si tenés el archivo Avid_ScriptSync.exe, no necesitás instalar nada:
+  1. Doble clic en Avid_ScriptSync.exe.
+     La primera vez Windows puede mostrar "Windows protegió su PC"
+     (la app no está firmada): tocá "Más información" > "Ejecutar de
+     todos modos".
+  2. Elegí (o arrastrá) la carpeta del proyecto de Avid y la carpeta de
+     las desgrabaciones.
+  3. "1. Importar desgrabaciones".
+  4. "2a. Simular enlace" para ver qué va a hacer, y "2b. Enlazar".
+     La casilla "Rehacer los ya enlazados" equivale a --forzar.
+  La app recuerda las últimas carpetas usadas. Todo lo que sigue sobre
+  formato, seguridad y limitaciones vale igual para la app.
+
+  Para generar el .exe (una sola vez, en una PC con Python): carpeta
+  "Compilar_App_Windows" > doble clic en Compilar_EXE.bat.
+
+
+INSTALACIÓN (versión con scripts .bat / .command)
+-------------------------------------------------
+Windows:
+  1. Descomprimí el .zip donde quieras.
+  2. Usá los archivos de la carpeta "Windows".
+
+Mac:
+  1. Descomprimí el .zip donde quieras.
+  2. La PRIMERA vez, abrí la Terminal y escribí  xattr -cr  (con un
+     espacio al final). Arrastrá la carpeta "Mac" a la Terminal y apretá
+     Enter. Esto quita el bloqueo de Gatekeeper ("no se puede abrir
+     porque proviene de un desarrollador no identificado").
+  3. Usá los archivos de la carpeta "Mac" (doble clic en los .command).
+     La primera vez se prepara un Python propio en ~/.avid_scripts
+     (tarda un minuto). No toca el Python del sistema.
+
+
+FORMATO DE LAS DESGRABACIONES
+-----------------------------
+- Un .txt por subclip.
+- El NOMBRE DEL .TXT TIENE QUE SER IGUAL AL NOMBRE DEL SUBCLIP en Avid.
+    Subclip:  PIERINE_ENTREVISTA_02-[A]
+    Archivo:  PIERINE_ENTREVISTA_02-[A].txt
+- Cada párrafo va precedido por una línea con su timecode. Se aceptan
+  dos formatos:
+
+  a) Contado desde el INICIO DEL SUBCLIP, entre corchetes:
+
+       [00:00:06] Speaker 2
+       ¿Me decís tu nombre completo? Carlos Andrés...
+
+  b) TC DE ORIGEN del clip, con frames (y opcionalmente el TC de salida):
+
+       20:59:59:23 - 21:00:08:08
+       Speaker 1
+       ¿Carlos, si te pregunto qué es la línea negra?...
+
+     ScriptSync lee el TC de inicio del clip y calcula la posición sola.
+     Si el TC no cae dentro del clip, lo toma como contado desde el
+     inicio del subclip.
+
+  Son los formatos que exportan la mayoría de los servicios de
+  transcripción. La línea del hablante ("Speaker 1") es opcional: la
+  marca se pone en la primera línea de texto del párrafo.
+- Codificación: UTF-8 (o Windows-1252). Los acentos se respetan.
+
+
+USO (versión con scripts .bat / .command)
+-----------------------------------------
+IMPORTANTE: Media Composer tiene que estar CERRADO en los dos pasos.
+
+PASO 1 - Importar las desgrabaciones como scripts
+  1. Doble clic en Importar_Scripts (.bat en Windows, .command en Mac).
+     En Windows también podés arrastrar la carpeta de .txt sobre el .bat.
+  2. Te pide la carpeta con los .txt: arrastrala a la ventana y Enter.
+  3. Te pide la carpeta del proyecto de Avid (la que tiene el .avp):
+     arrastrala y Enter.
+     Ubicaciones habituales:
+       Windows: Documentos\Avid Projects\<proyecto>
+       Mac:     /Users/Shared/AvidMediaComposer/Avid Projects/<proyecto>
+                o Documentos/Avid Projects/<proyecto>
+  4. Se crea "<nombre> Script" por cada .txt. Si ya existe un script con
+     ese nombre, no lo toca.
+  Si querés, abrí Avid, ordená los scripts en una carpeta de la ventana
+  de proyecto y volvé a cerrar Avid.
+
+PASO 2 - Enlazar con los subclips (ScriptSync)
+  1. Doble clic en ScriptSync_Avid (.bat / .command).
+  2. Arrastrá la carpeta del proyecto de Avid y Enter.
+  3. Te pregunta:
+       Enter      -> ENLAZA
+       S + Enter  -> solo SIMULA: muestra qué haría, sin modificar nada.
+                     Recomendado la primera vez.
+  4. Al final ves una lista:
+       OK  nombre   NN marcas   -> enlazado, con NN script marks
+       -   nombre               -> ya tenía un subclip enlazado, no se toca
+       !   nombre               -> no hay ningún clip con ese nombre, o hay
+                                   dos clips distintos que se llaman igual
+  5. Abrí el proyecto en Avid, abrí un script y hacé clic en las marcas.
+
+  Para rehacer scripts que ya estaban enlazados (por ejemplo, porque
+  cambiaste la desgrabación), corré desde una terminal:
+      python ScriptSync_Avid.py "CARPETA_DEL_PROYECTO" --forzar
+
+
+SEGURIDAD
+---------
+- ScriptSync guarda una copia de cada script ANTES de modificarlo en:
+      <proyecto>\_Backup_ScriptSync\<fecha_hora>\
+  Para volver atrás: con Avid cerrado, copiá el script del backup a su
+  lugar original (por ejemplo, la carpeta SCRIPTS del proyecto).
+- No modifica bins, clips ni media. Solo crea o modifica los archivos de
+  script (.avc).
+- Recomendación: la primera vez, probalo en una COPIA del proyecto.
+
+
+LIMITACIONES
+------------
+- Las marcas van por PÁRRAFO (una por cada bloque [HH:MM:SS]), no por
+  palabra: el clic lleva al inicio del párrafo.
+- Funciona con SUBCLIPS (o, si no hay subclip, con un master clip) cuyo
+  nombre es exactamente igual al del script, sin " Script".
+- El formato de los scripts de Avid no está documentado: lo descifré
+  analizando archivos de Media Composer 2026.8. Con otras versiones
+  probablemente funcione, pero PROBALO PRIMERO EN UNA COPIA del proyecto.
+- El timecode de la desgrabación se cuenta desde el inicio del subclip.
+  Si un subclip no empieza en el frame 0 de su master clip, ScriptSync
+  muestra un AVISO: verificá esas marcas.
+
+
+PROBLEMAS FRECUENTES
+--------------------
+"Scripts: 0"
+   La carpeta que arrastraste no es la del proyecto, o los scripts
+   todavía no se importaron.
+"no hay ningun clip con ese nombre"
+   El nombre del subclip y el del .txt no coinciden exactamente
+   (espacios, guiones, [A] / [B], mayúsculas).
+"No encuentro Python"
+   Instalalo (ver REQUISITOS). En Windows, marcá "Add to PATH".
+En Mac, "no se puede abrir el .command"
+   Hacé el paso 2 de la instalación (xattr -cr) o clic derecho > Abrir.
+Las marcas no aparecen en Avid
+   Si Avid estaba abierto mientras corría la herramienta, al guardar
+   pudo pisar los cambios. Cerralo, corré ScriptSync con --forzar y
+   abrí el proyecto.
+
+=====================================================================
