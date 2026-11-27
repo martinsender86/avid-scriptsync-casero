@@ -39,6 +39,6 @@ El detalle completo (formato de las desgrabaciones, nombres, problemas frecuente
 | `Windows/` | Scripts de Python + lanzadores `.bat` |
 | `Mac/` | Los mismos scripts + lanzadores `.command` + `LEEME.txt` |
 
-## Descargas
+## Descargas (listo para usar)
 
-La app para Windows (`Avid_ScriptSync.exe`, no necesita Python) está en **Releases**.
+La app para Windows (`Avid_ScriptSync.exe`, no necesita Python) está en la carpeta **`descargas/`**.
